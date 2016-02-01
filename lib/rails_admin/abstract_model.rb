@@ -82,16 +82,17 @@ module RailsAdmin
       model.where(conditions)
     end
 
-    def each_associated_children(object)
+    def each_associated_children(object, limit = nil)
       associations.each do |association|
         case association.type
         when :has_one
           if child = object.send(association.name)
-            yield(association, [child])
+            yield(association, [child], 1)
           end
         when :has_many
           children = object.send(association.name)
-          yield(association, Array.new(children))
+          limited_children = limit.nil? ? children : children.limit(limit)
+          yield(association, Array.new(limited_children), children.count)
         end
       end
     end
